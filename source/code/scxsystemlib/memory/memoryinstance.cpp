@@ -954,7 +954,14 @@ namespace SCXSystemLib
         GetCacheSize(cacheSize);
         SCX_LOGTRACE(m_log, StrAppend(L"MemoryInstance::Update() - ZFS Cache Size (", cacheSize).append(L")"));
 
-        m_availableMemory += cacheSize;
+        // At times, in low memory situations, available_mem + zfs_cache > physical_mem.
+        // This is odd, and a trouble ticket is opened with Oracle on this.
+        // TEMPORARY FIX ONLY!
+        if ( m_availableMemory + cacheSize <= m_totalPhysicalMemory )
+        {
+            m_availableMemory += cacheSize;
+        }
+
         m_usedMemory = m_totalPhysicalMemory - m_availableMemory;           // Resulting units: bytes
 
         SCX_LOGTRACE(m_log, StrAppend(L"MemoryInstance::Update() - New Memory Available (", m_availableMemory).append(L")"));
